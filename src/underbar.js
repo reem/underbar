@@ -75,6 +75,13 @@ var _ = { };
 
     // Return all elements of an array that pass a truth test.
     _.filter = function(collection, test) {
+        // This implementation might be a little too functional for js
+        // but I like that it avoids side effects by using reduce.
+        return _.reduce(collection, function (acc, next) {
+            if (test(next)) {
+                return acc.concat([next]);
+            } return acc;
+        }, []);
     };
 
     // Return all elements of an array that don't pass a truth test.
