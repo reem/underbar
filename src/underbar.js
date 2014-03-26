@@ -91,6 +91,17 @@ var _ = { };
 
     // Produce a duplicate-free version of the array.
     _.uniq = function(array) {
+        // Has to be O(n^2) unless you assume .toString exists and generates
+        // unique strings or you assume the objects in the array are comparable
+        // and generate some form of BST.
+        var seen = [];
+        return _.filter(array, function(val) {
+            if (seen.indexOf(val) > -1) {
+                return false;
+            }
+            seen.push(val);
+            return true;
+        });
     };
 
 
