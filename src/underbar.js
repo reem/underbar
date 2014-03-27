@@ -373,6 +373,18 @@ var _ = { };
     //
     // See the Underbar readme for details.
     _.throttle = function(func, wait) {
+        var locked = false;
+        var lastval = undefined;
+        var unlock = function () { locked = false; };
+
+        return function () {
+            if (!locked) {
+                setTimeout(unlock, wait);
+                locked = true;
+                lastval = func.apply(this, arguments);
+            }
+            return lastval;
+        };
     };
 
 }).call(this);
