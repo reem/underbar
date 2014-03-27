@@ -608,6 +608,7 @@ describe("throttle", function() {
 
         expect(counter).to.eql(1);
         setTimeout(function() {
+            throttledIncr();
             expect(counter).to.eql(2);
             done();
         }, 64);
