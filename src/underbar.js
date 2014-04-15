@@ -344,12 +344,32 @@ var _ = { };
     // If iterator is a string, sort objects by that property with the name
     // of that string. For example, _.sortBy(people, 'name') should sort
     // an array of people by their name.
-    /*
-    var sort = function (array) {
-      //placeholder
-      return array.slice().sort();
+
+    var merge = function (left, right, compare) {
+      var leftIndex = 0;
+      var rightIndex = 0;
+
+      var merged = [];
+      while (leftIndex < left.length && rightIndex < right.length) {
+        if (!(compare(left[leftIndex], right[rightIndex]))) {
+          merged.push(left[leftIndex++]);
+        } else {
+          merged.push(right[rightIndex++]);
+        }
+      }
+
+      return merged.concat(leftIndex < left.length ?
+        left.slice(leftIndex) :
+        right.slice(rightIndex));
     };
-    */
+
+    var mergesort = function (arr, compare) {
+      if (arr.length === 1 || arr.length === 0) {
+        return arr;
+      }
+      return merge(mergesort(arr.slice(0, arr.length / 2), compare),
+                   mergesort(arr.slice(arr.length / 2), compare), compare);
+    };
 
     _.sortBy = function(collection, iterator) {
       iterator = iterator || _.identity;
@@ -361,9 +381,12 @@ var _ = { };
         var invoker = iterator;
       }
       var sortFunc = function (a, b) {
+        a = a || Infinity;
+        b = b || Infinity;
         return invoker(a) > invoker(b);
       };
-      return collection.slice().sort(sortFunc);
+      return mergesort(collection.slice(), sortFunc);
+      //return collection.slice().sort(sortFunc);
     };
 
     var times = function (n, func) {
@@ -409,14 +432,44 @@ var _ = { };
       }, []);
     };
 
+    var toObject = function (array) {
+      var obj = {};
+      _.each(array, function (val) { obj[val] = val; });
+      return obj;
+    };
+
     // Takes an arbitrary number of arrays and produces an array that contains
     // every item shared between all the passed-in arrays.
     _.intersection = function() {
+      var arrays = toArray(arguments);
+      var exist = _.map(arrays, toObject);
+      var results = {};
+
+      _.each(arrays, function (array) {
+        _.each(array, function (element) {
+          if (_.every(exist, function(objArray) { return element in objArray; })) {
+            results[element] = element;
+          }
+        });
+      });
+
+      return _.map(results, _.identity);
     };
 
     // Take the difference between one array and a number of other arrays.
     // Only the elements present in just the first array will remain.
     _.difference = function(array) {
+      var arrays = toArray(arguments).slice(1);
+      if (arrays.length === 1) {
+        return _.map(_.reduce(arrays[0], function (acc, key) {
+          delete acc[key];
+          return acc;
+        }, toObject(array)), _.identity);
+      } else {
+        return _.reduce(arrays, function (acc, array) {
+          return _.difference(acc, _.intersection(acc, array));
+        }, array);
+      }
     };
 
 
