@@ -132,20 +132,22 @@ var _ = { };
         });
     };
 
-    // Calls the method named by methodName on each value in the list.
-    // Note: you will nead to learn a bit about .apply to complete this.
-    _.invoke = function(collection, functionOrKey, args) {
+    var makeInvoker = function (functionOrKey, args) {
       if (typeof functionOrKey === "string") {
-        var func = function () { return this[functionOrKey](); };
+        var invoker = function () { return this[functionOrKey](); };
       } else if (typeof functionOrKey === "function") {
-        var func = functionOrKey;
+        var invoker = functionOrKey;
       } else {
         throw new Error("Wrong type for functionOrKey.");
       }
 
-      return _.map(collection, function (val) {
-        return func.apply(val, args);
-      });
+      return function (val) { return invoker.apply(val, args); };
+    };
+
+    // Calls the method named by methodName on each value in the list.
+    // Note: you will nead to learn a bit about .apply to complete this.
+    _.invoke = function(collection, functionOrKey, args) {
+      return _.map(collection, makeInvoker(functionOrKey, args));
     };
 
     // Reduces an array or object to a single value by repetitively calling
@@ -299,16 +301,21 @@ var _ = { };
     // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
     // call someFunction('a', 'b') after 500ms
     _.delay = function(func, wait) {
+      var extraArgs = toArray(arguments).slice(2);
+
       setTimeout(function () {
-        func.apply(null, toArray(arguments).slice(2));
+        return func.apply(this, extraArgs);
       }, wait);
     };
-
 
     /**
      * ADVANCED COLLECTION OPERATIONS
      * ==============================
      */
+
+    var randomInt = function (min, max) {
+      return Math.random() * (max - min) + min;
+    };
 
     // Randomizes the order of an array's contents.
     //
@@ -316,6 +323,14 @@ var _ = { };
     // input array. For a tip on how to make a copy of an array, see:
     // http://mdn.io/Array.prototype.slice
     _.shuffle = function(array) {
+      var randomArray = Array.prototype.slice(array);
+      _.each(randomArray, function(_val, index) {
+        var otherIndex = randomInt(index + 1, randomArray.length - 1);
+        var tmp = randomArray[index];
+        randomArray[index] = randomArray[otherIndex];
+        randomArray[otherIndex] = tmp;
+      });
+      return randomArray;
     };
 
 
@@ -329,7 +344,32 @@ var _ = { };
     // If iterator is a string, sort objects by that property with the name
     // of that string. For example, _.sortBy(people, 'name') should sort
     // an array of people by their name.
+    /*
+    var sort = function (array) {
+      //placeholder
+      return array.slice().sort();
+    };
+    */
+
     _.sortBy = function(collection, iterator) {
+      iterator = iterator || _.identity;
+      if (typeof iterator === 'string') {
+        var invoker = function (val) {
+          return val[iterator];
+        };
+      } else {
+        var invoker = iterator;
+      }
+      var sortFunc = function (a, b) {
+        return invoker(a) > invoker(b);
+      };
+      return collection.slice().sort(sortFunc);
+    };
+
+    var times = function (n, func) {
+      for (var i = 0; i < n; i++) {
+        func();
+      }
     };
 
     // Zip together two or more arrays with elements of the same index
@@ -338,6 +378,20 @@ var _ = { };
     // Example:
     // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
     _.zip = function() {
+      var arrays = toArray(arguments);
+      var finalLength = Math.max.apply(null, _.pluck(arrays, 'length'));
+
+      var results = [];
+      times(finalLength, function () {
+        results.push([]);
+      });
+      _.each(arrays, function (array) {
+        for (var i = 0; i < finalLength; i++) {
+          results[i].push(array[i]);
+        }
+      });
+
+      return results;
     };
 
     // Takes a multidimensional array and converts it to a one-dimensional array.
