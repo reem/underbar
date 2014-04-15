@@ -373,14 +373,12 @@ var _ = { };
     //
     // See the Underbar readme for details.
     _.throttle = function(func, wait) {
-        var locked = false;
-        var lastval = undefined;
-        var unlock = function () { locked = false; };
+        var lastTime = 0;
+        var lastval;
 
         return function () {
-            if (!locked) {
-                setTimeout(unlock, wait);
-                locked = true;
+            if (Date.now() - lastTime >= wait) {
+                lastTime = Date.now();
                 lastval = func.apply(this, arguments);
             }
             return lastval;
