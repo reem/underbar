@@ -283,6 +283,13 @@ var _ = { };
     // already computed the result for the given argument and return that value
     // instead if possible.
     _.memoize = function(func) {
+      var cache = {};
+      return function (arg) {
+        if (!(arg in cache)) {
+          cache[arg] = func(arg);
+        }
+        return cache[arg];
+      };
     };
 
     // Delays a function for the given number of milliseconds, and then calls
@@ -292,6 +299,9 @@ var _ = { };
     // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
     // call someFunction('a', 'b') after 500ms
     _.delay = function(func, wait) {
+      setTimeout(function () {
+        func.apply(null, toArray(arguments).slice(2));
+      }, wait);
     };
 
 
@@ -357,7 +367,30 @@ var _ = { };
     // during a given window of time.
     //
     // See the Underbar readme for details.
-    _.throttle = function(func, wait) {
+    _.throttle = function(func, wait, leading) {
+      var lastTime = 0;
+      var lastVal;
+      var waitCall = false;
+      leading = leading === undefined ? false : true;
+
+      if (leading) {
+        setInterval(function () {
+          if (waitCall) {
+            lastVal = func.apply(this);
+            waitCall = false;
+            lastTime = Date.now();
+          }
+        }, wait);
+      }
+      return function () {
+        if (Date.now() - lastTime >= wait) {
+          lastTime = Date.now();
+          lastVal = func.apply(this, arguments);
+        } else {
+          waitCall = true;
+        }
+        return lastVal;
+      };
     };
 
 }).call(this);

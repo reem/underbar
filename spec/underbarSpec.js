@@ -602,7 +602,7 @@ describe("throttle", function() {
     var incr = function() {
       counter++;
     };
-    var throttledIncr = _.throttle(incr, 32);
+    var throttledIncr = _.throttle(incr, 32, true);
     throttledIncr();
     throttledIncr();
 
@@ -618,7 +618,7 @@ describe("throttle", function() {
     var incr = function() {
       return ++counter;
     };
-    var throttledIncr = _.throttle(incr, 32);
+    var throttledIncr = _.throttle(incr, 32, false);
     var result = throttledIncr();
     setTimeout(function() {
       expect(result).to.eql(1);
@@ -632,7 +632,7 @@ describe("throttle", function() {
     var incr = function() {
       return ++counter;
     };
-    var throttledIncr = _.throttle(incr, 64);
+    var throttledIncr = _.throttle(incr, 64, true);
     var results = [];
     var saveResult = function() {
       results.push(throttledIncr());
@@ -652,5 +652,5 @@ describe("throttle", function() {
       expect(results[5]).to.eql(3);
       done();
     }, 192);
-  })
+  });
 });
