@@ -399,6 +399,14 @@ var _ = { };
     //
     // Hint: Use Array.isArray to check if something is an array
     _.flatten = function(nestedArray, result) {
+      return _.reduce(nestedArray, function (result, possibArray) {
+        if (Array.isArray(possibArray)) {
+          return result.concat(_.flatten(possibArray));
+        } else {
+          result.push(possibArray);
+          return result;
+        }
+      }, []);
     };
 
     // Takes an arbitrary number of arrays and produces an array that contains
