@@ -1,6 +1,9 @@
 #underbar
 
-This is a copy of the work I did on a private repo, originally a project from
-[Hack Reactor's](http://hackreactor.com) curriculum. This project was worked
-on with a pair; it's representative of the kind of problems that I've tackled,
-but not of my solo work.
+This is my re-implementation of a core part of the most used underscorejs
+functions. It includes my implementation of common functions as map, each and
+reduce, which replace the vast majority of for-loops as well as higher-order
+functions such as once, memoize and throttle, which use closures to provide
+complex functionality.
+
+This is part of Hack Reactor’s curriculum.
